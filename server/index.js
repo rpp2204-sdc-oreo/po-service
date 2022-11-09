@@ -11,12 +11,13 @@ let port = 4000;
 
 // ACTUAL ROUTES
 app.get('/products', controllers.getProducts);
-app.get('/products/:product_id/styles', controllers.getStyles)
+app.get('/products/:product_id', controllers.getFeatures);
+app.get('/products/:product_id/styles', controllers.getStyles);
 
 // TEST ROUTES
-app.get('/features', controllers.getFeatures);
-app.get('/skus', controllers.getSkus);
-app.get('/photos', controllers.getPhotos);
+app.get('/features', controllers.testFeatures);
+app.get('/skus', controllers.testSkus);
+app.get('/photos', controllers.testPhotos);
 
 app.listen(port, function() {
   console.log(`listening on port ${port}`);

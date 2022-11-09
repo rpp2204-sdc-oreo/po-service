@@ -1,36 +1,58 @@
 const { Product, Sku, Style, Feature, Photo } = require("../database/index.js");
 
 exports.getProducts = (req, res) => {
-  // TODO: Implement this route handler
+  // Declare PAGE and COUNT from query params.
   const page = Number(req.query.page) || 1;
   const count = Number(req.query.count) || 5;
 
-  const promise1 = Product.aggregate([
+  // Generate Aggregation.
+  const productPromise = Product.aggregate([
+    { $project: { _id : 0} },
     { $sort: {id: 1} },
     { $skip: (page * 5) - 5 },
     { $limit: count }
-  ])
+  ]);
 
-  Promise.all([promise1]).then((values)=> {
+  // Run Aggregation.
+  Promise.all([productPromise]).then((values)=> {
+    // Declare Result Array
     const result = [];
 
+    // Loop through every product given from aggregation.
     for (var i = 0; i < values[0].length; i++) {
-      const oldObj = values[0][i];
-      let newObj = {};
-
-      newObj["id"] = oldObj.id;
-      newObj["name"] = oldObj.name;
-      newObj["description"] = oldObj.description;
-      newObj["category"] = oldObj.category;
-      newObj["default_price"] = oldObj.default_price;
-
-      result.push(newObj);
+      // ... push every product into Result Array.
+      result.push(values[0][i]);
     }
 
+    // Send Result Array.
     res.send(result);
   });
 };
 
+exports.getFeatures = (req, res) => {
+  // Declare PAGE and COUNT from query params.
+  const productID = req.params.product_id
+  console.log('1.) PRODUCT ID: ', productID);
+  console.log('1.) TYPEOF PRODUCTID: ', typeof productID);
+
+  // // Generate Product Aggregation.
+  const productPromise = Product.aggregate([
+    { $match: { id : Number(productID)} },
+    { $project: { _id : 0} },
+  ]);
+
+  const featurePromise = Feature.aggregate([
+    { $match: { product_id: Number(productID) }},
+    { $sort: { id: 1 }},
+    { $project: { _id: 0}}
+  ]);
+
+  // Run Aggregation.
+  Promise.all([productPromise, featurePromise]).then((values)=> {
+    console.log('2.) VALUES: ', values);
+    res.send(values);
+  });
+};
 
 exports.getStyles = (req, res) => {
   // TODO: Implement this route handler
@@ -43,10 +65,8 @@ exports.getStyles = (req, res) => {
 
   Style.aggregate([
     { $match: { productId: id}},
-    { $sort: { styleId: 1 }}
+    { $sort: { id : 1 }}
   ]).then((styles)=> {
-    console.log('_________________________');
-    console.log('STYLES: ', styles);
     result.product_id = id;
 
     for (var i = 0; i < styles.length; i++) {
@@ -59,33 +79,43 @@ exports.getStyles = (req, res) => {
       modStyle["original_price"] = rawStyle.original_price;
       modStyle["sale_price"] = Number(rawStyle.sale_price) || 0;
       modStyle["default?"] = Boolean(rawStyle.default_style);
-      modStyle["skus"] = [];
-      modStyle["photos"] = [];
 
       result.results.push(modStyle);
     }
   }).then(()=>{
 
     for (var i = 0; i < styleIDs.length; i++) {
-      const styleId = styleIDs[1];
-      skuPromises.push(Sku.aggregate([{ $match: { styleId } }]));
-      photoPromises.push(Photo.aggregate([{ $match: { styleId : String(styleIDs[i]) }}]));
+      const styleId = styleIDs[i];
+      skuPromises.push(Sku.aggregate([
+        { $project : { _id : 0 , }},
+        { $match: { styleId } },
+        { $sort: { id: 1 }}
+      ]));
+
+      photoPromises.push(Photo.aggregate([
+        { $project : { _id : 0 }},
+        { $match: { styleId } },
+        { $sort: { id: 1 }}
+      ]));
     }
 
-    console.log('PHOTO PROMISES: ', photoPromises);
     return Promise.all([Promise.all(skuPromises), Promise.all(photoPromises)]);
-  }).then((results) => {
-    console.log('_________________________')
-    console.log('SKUS  : ', results[0]);
-    console.log('PHOTOS: ', results[1])
+  }).then((values) => {
 
-    let styleSkus =
+    values[0].map((value, i) => {
+      result.results[i].skus = value;
+    });
 
+    values[1].map((value, i) => {
+      result.results[i].photos = value;
+    });
+
+    console.log('RESULT: ', result);
     res.send(result);
   })
 };
 
-exports.getFeatures = (req, res) => {
+exports.testFeatures = (req, res) => {
     // LOOK PERMANENTLY SORT DB
     const promise1 = Feature.find({}).sort({id: 1}).allowDiskUse(true);
 
@@ -101,7 +131,7 @@ exports.getFeatures = (req, res) => {
     });
 };
 
-exports.getSkus = (req, res) => {
+exports.testSkus = (req, res) => {
   // LOOK PERMANENTLY SORT DB
   const promise1 = Sku.find({}).sort({id: 1}).allowDiskUse(true);
 
@@ -117,7 +147,7 @@ exports.getSkus = (req, res) => {
   });
 };
 
-exports.getPhotos = (req, res) => {
+exports.testPhotos = (req, res) => {
   // LOOK PERMANENTLY SORT DB
   const promise1 = Photo.find({}).sort({id: 1}).allowDiskUse(true);
   const test = Photo.aggregate([
