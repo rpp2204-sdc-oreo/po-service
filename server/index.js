@@ -10,8 +10,14 @@ app.use(express.urlencoded({extended: true}));
 let port = 4000;
 
 // ACTUAL ROUTES
+
+// GET PRODUCTS
 app.get('/products', controllers.getProducts);
+
+// GET PRODUCT INFORMATION
 app.get('/products/:product_id', controllers.getFeatures);
+
+// GET PRODUCT STYLES
 app.get('/products/:product_id/styles', controllers.getStyles);
 
 // TEST ROUTES
