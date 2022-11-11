@@ -25,6 +25,11 @@ app.get('/products/:product_id', controllers.getFeatures);
 // GET PRODUCT STYLES
 app.get('/products/:product_id/styles', controllers.getStyles);
 
+// LOADER IO
+app.get('/loaderio-a69fa3aea08d61b85781f6f5454112b1', (req, res) => {
+  res.send('loaderio-a69fa3aea08d61b85781f6f5454112b1');
+});
+
 // TEST ROUTES
 app.get('/features', controllers.testFeatures);
 app.get('/skus', controllers.testSkus);
