@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/po_service');
-
+mongoose.connect('mongodb://localhost/po_service').then(() => {
+  console.log('SUCCESS CONNECTING TO DB!');
+});
 //MONGO OBJECT AGGREGATION PIPELINE
 
 const overviewSchema = new mongoose.Schema({
