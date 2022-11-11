@@ -7,7 +7,7 @@ exports.getProducts = (req, res) => {
 
   // Generate Aggregation.
   const productPromise = Product.aggregate([
-    // { $sort: {id: 1} },
+    { $sort: {id: 1} },
     { $skip: (page * 5) - 5 },
     { $limit: count },
     { $project: { _id : 0} }
