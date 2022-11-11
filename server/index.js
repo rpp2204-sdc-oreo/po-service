@@ -6,7 +6,12 @@ let app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-
+app.use((req,res, next) => {
+  console.log('REQ   :', req.method);
+  console.log('BODY  :', req.originalUrl);
+  console.log('PARAMS:', req.params);
+  next();
+});
 let port = 4000;
 
 // ACTUAL ROUTES
