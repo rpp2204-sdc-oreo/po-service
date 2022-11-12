@@ -2,6 +2,7 @@ const axios = require('axios');
 const express = require('express');
 const db = require('../database/index.js');
 const controllers = require('./controllers.js');
+const cache = require('../database/redis.js');
 let app = express();
 
 app.use(express.json());
@@ -17,10 +18,10 @@ let port = 4000;
 // ACTUAL ROUTES
 
 // GET PRODUCTS
-app.get('/products', controllers.getProducts);
+app.get('/products', cache.Find, controllers.getProducts, cache.Insert);
 
 // GET PRODUCT INFORMATION
-app.get('/products/:product_id', controllers.getFeatures);
+app.get('/products/:product_id', cache.Find, controllers.getFeatures, cache.Insert);
 
 // GET PRODUCT STYLES
 app.get('/products/:product_id/styles', controllers.getStyles);
@@ -34,6 +35,7 @@ app.get('/loaderio-a69fa3aea08d61b85781f6f5454112b1', (req, res) => {
 app.get('/features', controllers.testFeatures);
 app.get('/skus', controllers.testSkus);
 app.get('/photos', controllers.testPhotos);
+
 
 app.listen(port, function() {
   console.log(`listening on port ${port}`);

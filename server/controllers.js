@@ -1,7 +1,8 @@
 const { Product, Sku, Style, Feature, Photo } = require("../database/index.js");
+const { Client } = require("../database/redis.js");
 
-exports.getProducts = (req, res) => {
-  // Declare PAGE and COUNT from query params.
+exports.getProducts = (req, res, next) => {
+  // Declare PAGE and COUNT from query params
   const page = Number(req.query.page) || 1;
   const count = Number(req.query.count) || 5;
 
@@ -14,7 +15,7 @@ exports.getProducts = (req, res) => {
   ]);
 
   // Run Aggregation.
-  Promise.all([productPromise]).then((values)=> {
+  Promise.all([productPromise]).then((values) => {
     // Declare Result Array
     const result = [];
 
@@ -24,18 +25,17 @@ exports.getProducts = (req, res) => {
       result.push(values[0][i]);
     }
 
-    // Send Result Array.
+    res.locals.result = result;
+    console.log('RESULT WRITTEN: ', res.locals.result);
     res.send(result);
+    next();
   });
 };
 
-exports.getFeatures = (req, res) => {
+exports.getFeatures = (req, res, next) => {
   // Declare PAGE and COUNT from query params.
-  const productID = req.params.product_id
-  console.log('1.) PRODUCT ID: ', productID);
-  console.log('1.) TYPEOF PRODUCTID: ', typeof productID);
+  const {productID, key} = req.params.product_id
 
-  // // Generate Product Aggregation.
   const productPromise = Product.aggregate([
     { $match: { id : Number(productID)} },
     { $project: { _id : 0} },
@@ -49,8 +49,9 @@ exports.getFeatures = (req, res) => {
 
   // Run Aggregation.
   Promise.all([productPromise, featurePromise]).then((values)=> {
-    console.log('2.) VALUES: ', values);
+    console.log('MONGO GOT: ', values);
     res.send(values);
+    next();
   });
 };
 
