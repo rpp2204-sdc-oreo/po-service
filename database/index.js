@@ -10,21 +10,28 @@ const overviewSchema = new mongoose.Schema({
   slogan: String,
   description: String,
   category: String,
-  default_price: Number,
-  features: [{
-    feature: String,
-    value: String,
-  }],
-  styles: [{
-    original_price: Number,
-    sale_price: Number,
-    default: Boolean,
-    photos: [String],
-    skus: [{
-      quantity: Number,
-      size: String,
-    }]
-  }],
+  default_price: {type: Number, default: 0},
+  // features: [{
+  //   feature: String,
+  //   value: String,
+  // }],
+  // styles: [{
+  //   style_id: Number,
+  //   name: String,
+  //   original_price: {type: Number, default: 0},
+  //   sale_price: {type: Number, default: 0},
+  //   default_style: Boolean,
+  //   photos: [{
+  //     thumbnail_url: String,
+  //     url: String
+  //   }],
+  //   skus: [{
+  //     quantity: Number,
+  //     size: String,
+  //   }]
+  // }],
+  features: {},
+  styles: {},
 });
 
 const productSchema = new mongoose.Schema({
